@@ -12,16 +12,30 @@ case $- in          # iterate through shell flags
 esac
 
 
+# starship
+eval "$(starship init bash)"
+
+# helper functions
 cheat() { curl cheat.sh/$1; }
 weather() { curl wttr.in; }
 weather2() { curl v2.wttr.in; }
+alias prettyjson="python3 -m json.tool"
 
+# goto to fuzzy dir
+kek() {
+    if [ -z $1 ]; then
+        SOURCE_DIR=$HOME
+    else
+        SOURCE_DIR=$1
+    fi
+    TEMP_DIR=$(find "$SOURCE_DIR" -type d | fzf)
+    if [ "$TEMP_DIR" != "" ]; then
+        cd $TEMP_DIR
+    fi
+}
 
-# Find dirs with fzf and cd them
-alias kek='TEMP_DIR=$(find "$HOME" -type d | fzf); [ "$TEMP_DIR" = "" ] || cd $TEMP_DIR'
-# apply default screenlayout
-alias default='~/.screenlayout/default.sh'
-
+# edit fuzzy file
+alias vk='TEMP_DIR=$(find "." -type f | fzf); [ "$TEMP_DIR" = "" ] || nvim $TEMP_DIR'
 
 
 
@@ -45,13 +59,13 @@ shopt -s checkwinsize
 
 
 # set variable identifying the chroot you work in (used in the prompt below)
-if [ -z "${chroot_env:-}" ]; then
-    if [ -r /etc/debian_chroot ]; then
-        chroot_env=$(cat /etc/debian_chroot)
-    elif [ -r /etc/arch-release ]; then
-        chroot_env="arch_chroot"
-    fi
-fi
+# if [ -z "${chroot_env:-}" ]; then
+#     if [ -r /etc/debian_chroot ]; then
+#         chroot_env=$(cat /etc/debian_chroot)
+#     elif [ -r /etc/arch-release ]; then
+#         chroot_env="arch_chroot"
+#     fi
+# fi
 
 # colorful prompt
 case "$TERM" in
@@ -123,6 +137,11 @@ if ! shopt -oq posix; then
   elif [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
   fi
+fi
+
+# Source files from local directory
+if [ -d "$HOME/bin" ] ; then
+    PATH="$HOME/bin:$PATH"
 fi
 
 # Load Cargo environment if it exists
